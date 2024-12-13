@@ -16,7 +16,10 @@ static void Process_number(size_t* iterating_through_array, size_t* i,
                            Identifiers* identifiers, Info_buffer* info_buffer);
 static void Process_operation(size_t* iterating_through_array, size_t* i,
                               Identifiers* identifiers, Info_buffer* info_buffer);
+static void Process_end_symbol(size_t* iterating_through_array, size_t* i, Identifiers* identifiers);
+
 static Operation Str_to_op(const char* argument);
+
 
 Identifiers* Lexical_analysis(Info_buffer* info_buffer)
 {
@@ -40,6 +43,12 @@ Identifiers* Lexical_analysis(Info_buffer* info_buffer)
             Process_bracket(&iterating_through_array, &i, identifiers + iterating_through_array, Types_RIGHT_BRACKET);
         }
 
+        else if (info_buffer->buffer[i] == END)
+        {
+            DPRINTF("END: %c\n", info_buffer->buffer[i]);
+            Process_end_symbol(&iterating_through_array, &i, identifiers + iterating_through_array);
+        }
+
         else if (isdigit(info_buffer->buffer[i]))
         {
             DPRINTF("NUMBER: %c\n", info_buffer->buffer[i]);
@@ -54,6 +63,21 @@ Identifiers* Lexical_analysis(Info_buffer* info_buffer)
     }
 
     return identifiers;
+}
+
+static void Process_end_symbol(size_t* iterating_through_array, size_t* i, Identifiers* identifiers)
+{
+    assert(iterating_through_array != NULL);
+    assert(i != NULL);
+    assert(identifiers != NULL);
+               
+    identifiers->index_first_symbol = *i;    
+    identifiers->index_last_symbol = *i;     
+    identifiers->size_in_char = 1;           
+    identifiers->type = Types_END_SYMBOL;                
+                                             
+    (*iterating_through_array)++;              
+    (*i)++;
 }
 
 static void Process_operation(size_t* iterating_through_array, size_t* i,
@@ -71,9 +95,19 @@ static void Process_operation(size_t* iterating_through_array, size_t* i,
         identifiers->index_last_symbol = *i;
         identifiers->size_in_char = 1;
 
-        Operation operation = Str_to_op(info_buffer->buffer + *i);
+        char* word_buffer = (char*)calloc(identifiers->size_in_char + 1, sizeof(char));
+        strncpy(word_buffer, info_buffer->buffer + identifiers->index_first_symbol, identifiers->size_in_char);
+
+        Operation operation = Str_to_op(word_buffer);
         identifiers->type = Types_OPERATION;
         identifiers->argument.operation = operation;
+
+        // fprintf(stderr, "_______ index_first_symbol = %lu_______\n", identifiers->index_first_symbol);
+        // fprintf(stderr, "_______ index_last_symbol = %lu_______\n", identifiers->index_last_symbol);
+        // fprintf(stderr, "_______ size_in_char = %lu_______\n", identifiers->size_in_char);
+        // fprintf(stderr, "_______ type = %d_______\n", identifiers->type);
+        // fprintf(stderr, "_______ operation = %d_______\n", identifiers->argument.operation);
+
         (*i)++;
     }
 

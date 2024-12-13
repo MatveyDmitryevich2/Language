@@ -35,6 +35,7 @@ static const char EXP_          [] = "exp";
 
 static const char DOT = '.';
 static const char UNDERSCORE = '_';
+static const char END = '$';
 static const size_t MAX_QUANTITY_IDENTIFIERS = 100;
 
 enum Bracket
@@ -51,6 +52,7 @@ enum Types
     Types_OPERATION     = 3,
     Types_LEFT_BRACKET  = 4,
     Types_RIGHT_BRACKET = 5,
+    Types_END_SYMBOL    = 6,
 };
 
 
